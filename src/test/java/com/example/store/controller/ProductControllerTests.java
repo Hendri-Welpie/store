@@ -1,9 +1,9 @@
 package com.example.store.controller;
 
-import com.example.store.dto.CustomerDTO;
-import com.example.store.entity.Customer;
-import com.example.store.mapper.CustomerMapper;
-import com.example.store.repository.CustomerRepository;
+import com.example.store.dto.ProductDTO;
+import com.example.store.entity.Product;
+import com.example.store.mapper.ProductMapper;
+import com.example.store.repository.ProductRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,10 +27,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
-@WebMvcTest(CustomerController.class)
-@ComponentScan(basePackageClasses = CustomerMapper.class)
-class CustomerControllerTests {
-
+@WebMvcTest(ProductController.class)
+@ComponentScan(basePackageClasses = ProductMapper.class)
+public class ProductControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
@@ -38,41 +37,41 @@ class CustomerControllerTests {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private CustomerRepository customerRepository;
+    private ProductRepository productRepository;
 
     @MockitoBean
-    private CustomerMapper customerMapper;
+    private ProductMapper productMapper;
 
-    private Customer customer;
+    private Product product;
 
     @BeforeEach
     void setUp() {
-        customer = new Customer();
-        customer.setName("John Doe");
-        customer.setId(1L);
+        product = new Product();
+        product.setDescription("Vortex Viper Bino 12x50");
+        product.setId(1L);
     }
 
     @Test
-    void testCreateCustomer() throws Exception {
-        when(customerRepository.save(any(Customer.class))).thenReturn(customer);
-        when(customerMapper.customerToCustomerDTO(any(Customer.class)))
-                .thenReturn(new CustomerDTO(1L, "John Doe", null));
+    void testCreateProducts() throws Exception {
+        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productMapper.productToProductDTO(any(Product.class)))
+                .thenReturn(new ProductDTO(1L, "Vortex Viper Bino 12x50", List.of()));
 
-        mockMvc.perform(post("/customer")
+        mockMvc.perform(post("/products")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(toJson(customer)))
+                        .content(toJson(product)))
                 .andExpect(status().isCreated())
-                .andExpect(content().json(toJson(new CustomerDTO(1L, "John Doe", null))));
+                .andExpect(content().json(toJson(new ProductDTO(1L, "Vortex Viper Bino 12x50", List.of()))));
     }
 
     @Test
     void testGetAllCustomers() throws Exception {
-        when(customerRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(customer)));
+        when(productRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(product)));
 
-        when(customerMapper.customersToCustomerDTOs(anyList()))
-                .thenReturn(List.of(new CustomerDTO(1L, "John Doe", null)));
+        when(productMapper.productsToProductDTOs(anyList()))
+                .thenReturn(List.of(new ProductDTO(1L, "Vortex Viper Bino 12x50", null)));
 
-        mockMvc.perform(asyncDispatch(mockMvc.perform(get("/customer"))
+        mockMvc.perform(asyncDispatch(mockMvc.perform(get("/products"))
                         .andExpect(request().asyncStarted())
                         .andReturn()))
                 .andExpect(status().isOk())
@@ -81,7 +80,7 @@ class CustomerControllerTests {
                                 .json(
                                         """
                             [
-                              {"id":1,"name":"John Doe","orders":null}
+                              {"id":1,"description":"Vortex Viper Bino 12x50","orderIds":null}
                             ]
                         """));
     }
